@@ -27,6 +27,8 @@ KEYWORD = [
 fileName = list(filter(lambda pdf: pdf[-3:] == 'pdf' ,os.listdir(PDF_TYPE)))
 # fileName = ["SI_HANV08177300.pdf"]
 
+print('Hello World')
+
 if __name__ == '__main__':
     for file in fileName:
         # Reset Current CONFIG
