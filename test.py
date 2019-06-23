@@ -3,17 +3,11 @@ import json
 import os
 import re
 
-# import pdb
-# pdb.set_trace()
-
 PDF_TYPE = "VN101466"
 CURR_CONFIG = {}
 
 with open(PDF_TYPE + '/' + PDF_TYPE + '.json', 'r', encoding='utf8') as json_file:
     CONFIG = json.load(json_file)
-
-with open(PDF_TYPE + '/' + PDF_TYPE + 'Area.json','r',encoding='utf8') as json_file:
-    RECTANGLES=json.load(json_file)
 
 # KEYWORD = [
 #             'SHIPPING REQUEST', 'Shipper', 'Consignee', 'Notify', 'Reference No.', 'Booking No.', 'TO  ',
@@ -70,7 +64,8 @@ if __name__ == '__main__':
                 kwpos[newKey]=kwpos_temp[key][0]
        
         for key in CONFIG:
-            if (CONFIG[key]['isFlex']): 
+            print(key)
+            if (key[:4]!='Area' and CONFIG[key]['isFlex']):
                 top=CONFIG[key]['endObject']['top']
                 bot=CONFIG[key]['endObject']['bottom']
                 topAndKeywordOnSingleLine=CONFIG[key]['topAndKeywordOnSingleLine']
@@ -97,23 +92,14 @@ if __name__ == '__main__':
 
         data={}
         for key in CONFIG:
-            row=CONFIG[key]['row']
-            column=CONFIG[key]['column']
-            lines=lineList[row[0]:row[1]]
-            data[key]='\n'.join([x[column[0]:column[1]] for x in lines])
-
-        chosenData={}
-        for key in RECTANGLES:
-            x1=RECTANGLES[key]['x1']
-            x2=RECTANGLES[key]['x2']
-            y1=RECTANGLES[key]['y1']
-            y2=RECTANGLES[key]['y2']
-            
-            lines=lineList[x1:x2]
-            chosenData[key]='\n'.join([x[y1:y2] for x in lines])
+            if (key[0:4] != 'Area'):
+                row=CONFIG[key]['row']
+                column=CONFIG[key]['column']
+                lines=lineList[row[0]:row[1]]
+                data[key]='\n'.join([x[column[0]:column[1]] for x in lines])
 
         for key in CONFIG:
-            if (CONFIG[key]['hasSubfield']):
+            if (key[:4]!='Area' and CONFIG[key]['hasSubfield']):
                 pos=0
                 for subfield in CONFIG[key]['subfields']:
                     if CONFIG[key]['subfields'][subfield]!=10: 
@@ -124,6 +110,16 @@ if __name__ == '__main__':
                         data[key+subfield]=data[key][pos:]
                 del data[key]
 
+        for key in CONFIG:
+            if (key[0:4] == 'Area'):
+                x1=CONFIG[key]['x1']
+                x2=CONFIG[key]['x2']
+                y1=CONFIG[key]['y1']
+                y2=CONFIG[key]['y2']
+            
+                lines=lineList[x1:x2]
+                data[key]='\n'.join([x[y1:y2] for x in lines])
+
         for key in data:
             data_pros=data[key]
             data_pros=data_pros.strip()
@@ -131,9 +127,3 @@ if __name__ == '__main__':
             data_pros=re.sub('\n\s+','\n',data_pros)
             print('%s:\n%s' % (key,data_pros))
 
-        for key in chosenData:
-            data_pros=chosenData[key]
-            data_pros=data_pros.strip()
-            data_pros=re.sub('\n+','\n',data_pros)
-            data_pros=re.sub('\n\s+','\n',data_pros)
-            print('%s:\n%s' % (key,data_pros))

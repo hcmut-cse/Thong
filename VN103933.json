@@ -367,7 +367,6 @@
             "topAndKeywordOnSingleLine": 0,
             "contentSameLineWithKeyword": 0,
             "isFlex": 1,    
-            "hasSubfield": 0,
             "endObject": 
             {
                 "top": "No of Package",
@@ -426,5 +425,13 @@
                 "left": "Weight",
                 "right": -1
             }
+        },
+
+        "Area1":
+        {
+            "x1": 29,
+            "y1": 102,
+            "x2": 31,
+            "y2": 115
         }
 }
