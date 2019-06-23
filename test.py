@@ -3,26 +3,30 @@ import json
 import os
 import re
 
-PDF_TYPE = "VN103933"
+# import pdb
+# pdb.set_trace()
+
+PDF_TYPE = "VN101466"
 CURR_CONFIG = {}
 
 with open(PDF_TYPE + '/' + PDF_TYPE + '.json', 'r', encoding='utf8') as json_file:
     CONFIG = json.load(json_file)
 
-# KEYWORD FOR VN103933
-KEYWORD = [
-            'SHIPPING REQUEST', 'Shipper', 'Consignee', 'Notify', 'Reference No.', 'Booking No.', 'TO  ',
-            'TEL  ','FAX  ','ATTN', 'FROM', 'E-MAIL', 'M.B/L Type', 'HS Code', 'M.Vessel/Voyage',
-            'Port of Loading', 'Delivery', 'ETD', 'ETA', 'Port of Discharge', 'Final Destination', 'Mark & Number',
-            'No of Package', 'Description of Goods', 'Weight', 'Measurement', 'FREIGHT PREPAID'
-            ]
+with open(PDF_TYPE + '/' + PDF_TYPE + 'Area.json','r',encoding='utf8') as json_file:
+    RECTANGLES=json.load(json_file)
 
-# KEYWORD FOR VN 101466
-# KEYWORD = ['From','To','Booking No.','Date','Shipper Name & Address',
-#             'Consignee Name & Address','Notify Party','Port of Loading',
-#             'Port of Discharge','Place of Delivery','Vessel',
-#             'Etd','Container/Seal No.','Packages','Description of Goods',
-#             'CBM','Remarks  ','Payment','Total','G.W (KGS)','page']
+# KEYWORD = [
+#             'SHIPPING REQUEST', 'Shipper', 'Consignee', 'Notify', 'Reference No.', 'Booking No.', 'TO  ',
+#             'TEL  ','FAX  ','ATTN', 'FROM', 'E-MAIL', 'M.B/L Type', 'HS Code', 'M.Vessel/Voyage',
+#             'Port of Loading', 'Delivery', 'ETD', 'ETA', 'Port of Discharge', 'Final Destination', 'Mark & Number',
+#             'No of Package', 'Description of Goods', 'Weight', 'Measurement', 'FREIGHT PREPAID'
+#             ]
+
+KEYWORD = ['From','To','Booking No.','Date','Shipper Name & Address',
+            'Consignee Name & Address','Notify Party','Port of Loading',
+            'Port of Discharge','Place of Delivery','Vessel',
+            'Etd','Container/Seal No.','Packages','Description of Goods',
+            'CBM','Remarks  ','Payment','Total','G.W (KGS)','page']
 
 fileName = list(filter(lambda pdf: pdf[-3:] == 'pdf' ,os.listdir(PDF_TYPE)))
 # fileName = ["SI_HANV08177300.pdf"]
@@ -98,6 +102,16 @@ if __name__ == '__main__':
             lines=lineList[row[0]:row[1]]
             data[key]='\n'.join([x[column[0]:column[1]] for x in lines])
 
+        chosenData={}
+        for key in RECTANGLES:
+            x1=RECTANGLES[key]['x1']
+            x2=RECTANGLES[key]['x2']
+            y1=RECTANGLES[key]['y1']
+            y2=RECTANGLES[key]['y2']
+            
+            lines=lineList[x1:x2]
+            chosenData[key]='\n'.join([x[y1:y2] for x in lines])
+
         for key in CONFIG:
             if (CONFIG[key]['hasSubfield']):
                 pos=0
@@ -112,6 +126,13 @@ if __name__ == '__main__':
 
         for key in data:
             data_pros=data[key]
+            data_pros=data_pros.strip()
+            data_pros=re.sub('\n+','\n',data_pros)
+            data_pros=re.sub('\n\s+','\n',data_pros)
+            print('%s:\n%s' % (key,data_pros))
+
+        for key in chosenData:
+            data_pros=chosenData[key]
             data_pros=data_pros.strip()
             data_pros=re.sub('\n+','\n',data_pros)
             data_pros=re.sub('\n\s+','\n',data_pros)
